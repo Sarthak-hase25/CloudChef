@@ -1,0 +1,42 @@
+{
+    "name": "backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/server.js",
+    "scripts": {
+        "db:studio": "prisma studio",
+        "db:push": "prisma db push",
+        "start": "node src/server.js",
+        "dev": "nodemon src/server.js",
+        "db:seed": "node prisma/seed.js",
+        "db:migrate": "prisma migrate dev"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "dependencies": {
+        "@prisma/adapter-pg": "^7.9.1",
+        "@prisma/client": "^7.9.1",
+        "bcryptjs": "^3.0.3",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1",
+        "express-rate-limit": "^8.6.1",
+        "express-validator": "^7.3.2",
+        "helmet": "^8.3.0",
+        "jsonwebtoken": "^9.0.3",
+        "morgan": "^1.11.0",
+        "multer": "^2.2.0",
+        "node-cron": "^4.6.0",
+        "nodemailer": "^9.0.3",
+        "pg": "^8.22.0",
+        "prisma": "^7.9.1",
+        "swagger-jsdoc": "^6.3.0",
+        "swagger-ui-express": "^5.0.1",
+        "zod": "^4.4.3"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.14"
+    }
+}

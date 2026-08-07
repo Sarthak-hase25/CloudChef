@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta -->
+    <title>CloudKitchen AI — Smart Kitchen Management Platform</title>
+    <meta name="description" content="AI-powered cloud kitchen management. Real-time orders, inventory tracking, demand forecasting, and intelligent analytics for modern restaurant operations." />
+    <meta name="keywords" content="cloud kitchen, AI, restaurant management, inventory, orders, demand forecast" />
+    <meta name="author" content="CloudKitchen AI" />
+    <meta name="application-name" content="CloudKitchen AI" />
+    <meta name="theme-color" content="#f97316" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="CloudKitchen AI — Smart Kitchen Management" />
+    <meta property="og:description" content="AI-powered cloud kitchen management platform with real-time analytics." />
+    <meta property="og:image" content="/og-image.png" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CloudKitchen AI" />
+
+    <!-- PWA -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CloudKitchen AI" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Preconnect for fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Inter font — single professional typeface -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..800;1,14..32,300..500&display=swap"
+    />
+
+    <!-- Prevent FOUC -->
+    <style>
+      html { visibility: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // Show content once JS is ready (prevents FOUC)
+      document.documentElement.style.visibility = 'visible';
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

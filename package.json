@@ -1,0 +1,17 @@
+{
+  "name": "cloudkitchen-ai",
+  "version": "1.0.0",
+  "description": "CloudKitchen AI — Full-Stack SaaS Platform",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names \"BACKEND,FRONTEND,AI\" --prefix-colors \"cyan,magenta,yellow\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"cd ai-service && python -m uvicorn main:app --reload --port 8000\"",
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "db:seed": "npm run db:seed --prefix backend",
+    "db:studio": "npm run db:studio --prefix backend",
+    "db:push": "npm run db:push --prefix backend",
+    "build": "npm run build --prefix frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

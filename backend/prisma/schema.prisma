@@ -1,0 +1,433 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  OWNER
+  MANAGER
+  CHEF
+  INVENTORY_STAFF
+  STAFF
+  DELIVERY
+  SUPPLIER
+  CUSTOMER
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  SENT
+  CONFIRMED
+  DELIVERED
+  CANCELLED
+}
+
+enum TransactionType {
+  PURCHASE
+  CONSUMPTION
+  WASTE
+  ADJUSTMENT
+}
+
+// ─── KITCHENS ─────────────────────────────────────────────────────────────────
+
+model Kitchen {
+  id        String   @id @default(cuid())
+  name      String
+  address   String?
+  city      String?
+  phone     String?
+  email     String?
+  timezone  String   @default("Asia/Kolkata")
+  logoUrl   String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users          User[]
+  menuCategories MenuCategory[]
+  menuItems      MenuItem[]
+  orders         Order[]
+  ingredients    Ingredient[]
+  suppliers      Supplier[]
+  customers      Customer[]
+  wasteLog       WasteLog[]
+  demandForecasts DemandForecast[]
+  auditLogs      AuditLog[]
+
+  @@map("kitchens")
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  kitchenId    String
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  phone        String?
+  avatarUrl    String?
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  kitchen    Kitchen    @relation(fields: [kitchenId], references: [id])
+  auditLogs  AuditLog[]
+  orders     Order[]    @relation("CreatedByUser")
+
+  @@index([kitchenId])
+  @@index([email])
+  @@map("users")
+}
+
+// ─── MENU ─────────────────────────────────────────────────────────────────────
+
+model MenuCategory {
+  id        String   @id @default(cuid())
+  kitchenId String
+  name      String
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  kitchen   Kitchen    @relation(fields: [kitchenId], references: [id])
+  menuItems MenuItem[]
+
+  @@index([kitchenId])
+  @@map("menu_categories")
+}
+
+model MenuItem {
+  id                  String   @id @default(cuid())
+  kitchenId           String
+  categoryId          String
+  name                String
+  description         String?
+  price               Float
+  aiSuggestedPrice    Float?
+  prepTimeMinutes     Int      @default(15)
+  imageUrl            String?
+  isAvailable         Boolean  @default(true)
+  isVeg               Boolean  @default(true)
+  calories            Int?
+  tags                String[] @default([])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  kitchen       Kitchen      @relation(fields: [kitchenId], references: [id])
+  category      MenuCategory @relation(fields: [categoryId], references: [id])
+  orderItems    OrderItem[]
+  demandForecasts DemandForecast[]
+  recommendations Recommendation[]
+  pricingSuggestions PricingSuggestion[]
+
+  @@index([kitchenId])
+  @@index([categoryId])
+  @@map("menu_items")
+}
+
+// ─── ORDERS ───────────────────────────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(cuid())
+  kitchenId     String
+  customerId    String?
+  createdById   String?
+  orderNumber   String      @unique
+  status        OrderStatus @default(PENDING)
+  subtotal      Float
+  tax           Float       @default(0)
+  discount      Float       @default(0)
+  total         Float
+  deliveryAddress String?
+  notes         String?
+  estimatedTime Int?        // minutes
+  placedAt      DateTime    @default(now())
+  confirmedAt   DateTime?
+  preparedAt    DateTime?
+  deliveredAt   DateTime?
+  cancelledAt   DateTime?
+  updatedAt     DateTime    @updatedAt
+
+  kitchen    Kitchen     @relation(fields: [kitchenId], references: [id])
+  customer   Customer?   @relation(fields: [customerId], references: [id])
+  createdBy  User?       @relation("CreatedByUser", fields: [createdById], references: [id])
+  items      OrderItem[]
+
+  @@index([kitchenId])
+  @@index([customerId])
+  @@index([status])
+  @@index([placedAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  menuItemId   String
+  quantity     Int
+  priceAtOrder Float
+  notes        String?
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ─── CUSTOMERS ────────────────────────────────────────────────────────────────
+
+model Customer {
+  id            String   @id @default(cuid())
+  kitchenId     String
+  name          String
+  email         String?
+  phone         String?
+  address       String?
+  loyaltyPoints Int      @default(0)
+  totalOrders   Int      @default(0)
+  totalSpent    Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  kitchen         Kitchen          @relation(fields: [kitchenId], references: [id])
+  orders          Order[]
+  feedback        Feedback[]
+  recommendations Recommendation[]
+
+  @@index([kitchenId])
+  @@index([phone])
+  @@map("customers")
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  customerId String
+  orderId    String?
+  rating     Int      // 1–5
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+  @@map("feedback")
+}
+
+// ─── INVENTORY ────────────────────────────────────────────────────────────────
+
+model Ingredient {
+  id             String   @id @default(cuid())
+  kitchenId      String
+  name           String
+  unit           String   // kg, litre, pieces, etc.
+  currentStock   Float    @default(0)
+  reorderLevel   Float    @default(0)
+  reorderQuantity Float   @default(0)
+  costPerUnit    Float    @default(0)
+  category       String?  // Vegetables, Dairy, Spices, etc.
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  kitchen              Kitchen               @relation(fields: [kitchenId], references: [id])
+  inventoryTransactions InventoryTransaction[]
+  wasteLogs            WasteLog[]
+
+  @@index([kitchenId])
+  @@map("ingredients")
+}
+
+model InventoryTransaction {
+  id           String          @id @default(cuid())
+  ingredientId String
+  type         TransactionType
+  quantity     Float
+  batchNumber  String?
+  expiryDate   DateTime?
+  supplierId   String?
+  notes        String?
+  createdAt    DateTime        @default(now())
+
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@index([ingredientId])
+  @@index([type])
+  @@index([expiryDate])
+  @@map("inventory_transactions")
+}
+
+model WasteLog {
+  id           String   @id @default(cuid())
+  kitchenId    String
+  ingredientId String
+  quantity     Float
+  reason       String?  // Over-preparation, Expired, Spilled, etc.
+  estimatedCost Float?
+  loggedAt     DateTime @default(now())
+
+  kitchen    Kitchen    @relation(fields: [kitchenId], references: [id])
+  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+
+  @@index([kitchenId])
+  @@index([loggedAt])
+  @@map("waste_logs")
+}
+
+// ─── SUPPLIERS ────────────────────────────────────────────────────────────────
+
+model Supplier {
+  id        String   @id @default(cuid())
+  kitchenId String
+  name      String
+  contactPerson String?
+  email     String?
+  phone     String?
+  address   String?
+  rating    Float    @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  kitchen        Kitchen         @relation(fields: [kitchenId], references: [id])
+  purchaseOrders PurchaseOrder[]
+
+  @@index([kitchenId])
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id          String              @id @default(cuid())
+  supplierId  String
+  orderNumber String              @unique
+  status      PurchaseOrderStatus @default(DRAFT)
+  total       Float               @default(0)
+  notes       String?
+  orderedAt   DateTime            @default(now())
+  expectedAt  DateTime?
+  deliveredAt DateTime?
+  updatedAt   DateTime            @updatedAt
+
+  supplier Supplier            @relation(fields: [supplierId], references: [id])
+  items    PurchaseOrderItem[]
+
+  @@index([supplierId])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id              String @id @default(cuid())
+  purchaseOrderId String
+  ingredientName  String
+  quantity        Float
+  unit            String
+  pricePerUnit    Float
+  total           Float
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+
+  @@map("purchase_order_items")
+}
+
+// ─── AI / ML TABLES ───────────────────────────────────────────────────────────
+
+model DemandForecast {
+  id           String   @id @default(cuid())
+  kitchenId    String
+  menuItemId   String?
+  forecastDate DateTime
+  predictedQty Float
+  actualQty    Float?
+  modelUsed    String   // random_forest, xgboost, lstm, prophet, lightgbm
+  mae          Float?
+  rmse         Float?
+  confidence   Float?
+  features     Json?    // feature values used
+  createdAt    DateTime @default(now())
+
+  kitchen  Kitchen   @relation(fields: [kitchenId], references: [id])
+  menuItem MenuItem? @relation(fields: [menuItemId], references: [id])
+
+  @@index([kitchenId])
+  @@index([forecastDate])
+  @@map("demand_forecasts")
+}
+
+model PricingSuggestion {
+  id             String   @id @default(cuid())
+  menuItemId     String
+  currentPrice   Float
+  suggestedPrice Float
+  confidence     Float
+  reason         String?
+  validFrom      DateTime
+  validTo        DateTime
+  isApplied      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([menuItemId])
+  @@map("pricing_suggestions")
+}
+
+model Recommendation {
+  id         String   @id @default(cuid())
+  customerId String
+  menuItemId String
+  score      Float
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([customerId])
+  @@map("recommendations")
+}
+
+// ─── AUDIT LOG ────────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  kitchenId String
+  userId    String?
+  action    String   // CREATE, UPDATE, DELETE, LOGIN, LOGOUT
+  entity    String   // Order, MenuItem, Ingredient, etc.
+  entityId  String?
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  kitchen Kitchen @relation(fields: [kitchenId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([kitchenId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
