@@ -1,0 +1,34 @@
+services:
+  # ─── Node.js Backend ────────────────────────────────────────────────────────
+  - type: web
+    name: cloudkitchen-backend
+    env: node
+    region: singapore # Change this if your DB is elsewhere
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # Connect this manually in Render dashboard to your DB
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true # Render will securely generate a random string
+      - key: FRONTEND_URL
+        value: https://your-vercel-domain.vercel.app # Update this in Render Dashboard later
+      - key: AI_SERVICE_URL
+        value: https://cloudkitchen-ai-service.onrender.com
+
+  # ─── Python FastAPI AI Service ──────────────────────────────────────────────
+  - type: web
+    name: cloudkitchen-ai-service
+    env: python
+    region: singapore
+    rootDir: ai-service
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
