@@ -46,7 +46,7 @@ export default function Settings() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <label className="text-sm text-gray-400">Full Name</label>
-                <input type="text" className="input" defaultValue="Sarthak Hase"/>
+                <input type="text" className="input" defaultValue="Darshana Chaudhari"/>
               </div>
               <div className="space-y-1.5">
                 <label className="text-sm text-gray-400">Email Address</label>

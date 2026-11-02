@@ -48,7 +48,7 @@ async function main() {
   const owner = await prisma.user.create({
     data: {
       kitchenId: kitchen.id,
-      name: 'Sarthak Hase',
+      name: 'Darshana Chuadhari',
       email: 'owner@cloudkitchen.ai',
       passwordHash,
       role: 'OWNER',

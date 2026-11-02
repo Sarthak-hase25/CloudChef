@@ -118,7 +118,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Good Morning, Sarthak 👋</h1>
+          <h1 className="text-2xl font-bold text-white">HELLO DARSHANA👋</h1>
           <p className="text-gray-500 text-sm mt-0.5">{today}</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-gray-500 bg-white/5 px-4 py-2 rounded-xl border border-white/5">
